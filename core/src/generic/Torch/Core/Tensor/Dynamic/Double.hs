@@ -37,6 +37,7 @@ import Torch.Core.StorageTypes
 import Torch.Raw.Internal (CTHDoubleTensor, CTHLongTensor)
 import qualified THDoubleTensor as T
 import qualified THLongTensor as T
+import qualified Torch.Raw.Storage as GenS
 import qualified Torch.Raw.Tensor.Generic as Gen
 import qualified Torch.Core.Tensor.Dim as Dim
 
@@ -195,7 +196,7 @@ rank :: DynamicTH t => t -> Int
 rank = Dim.rank' . shape
 
 type instance Gen.HaskReal TensorDouble = Double
-
+type instance Gen.Storage TensorDouble = StorageDouble
 
 withTHPtr :: THForeignRef t => t -> (Ptr (THForeignType t) -> b) -> IO b
 withTHPtr t op = withForeignPtr (getForeign t) (pure . op)
@@ -231,6 +232,13 @@ withTHPtr3M t0 t1 t2 op = do
       withForeignPtr (getForeign t2) $ \p2 ->
         op p0 p1 p2
 
+withTHPtr4M :: (THForeignRef t0, THForeignRef t1, THForeignRef t2, THForeignRef t3) => t0 -> t1 -> t2 -> t3 -> (Ptr (THForeignType t0) -> Ptr (THForeignType t1) -> Ptr (THForeignType t2) -> Ptr (THForeignType t3) -> IO b) -> IO b
+withTHPtr4M t0 t1 t2 t3 op = do
+  withForeignPtr (getForeign t0) $ \p0 ->
+    withForeignPtr (getForeign t1) $ \p1 ->
+      withForeignPtr (getForeign t2) $ \p2 ->
+        withForeignPtr (getForeign t3) $ \p3 ->
+          op p0 p1 p2 p3
 
 (.:) :: (b -> c) -> (a0 -> a1 -> b) -> a0 -> a1 -> c
 (.:) = (.) . (.)
@@ -252,11 +260,19 @@ instance TensorClass TensorDouble where
   clearFlag t i = withTHPtrM t (\p -> Gen.c_clearFlag p (fi i))
 
 {-
-  tensordata :: TensorDouble -> IO (HaskReal t)
-  desc :: TensorDouble -> CTHDescBuff
-  expand :: TensorDouble -> TensorDouble -> StorageLong -> IO ()
-  expandNd :: TensorDouble -> TensorDouble -> Int32 -> IO ()
+  tensordata :: TensorDouble -> IO (Ptr (HaskReal t))
 -}
+  desc :: TensorDouble -> IO Gen.CTHDescBuff
+  desc t = withTHPtr t Gen.c_desc
+
+  expand :: TensorDouble -> TensorDouble -> StorageLong -> IO ()
+  expand t0 t1 s = withTHPtr3M t0 t1 s Gen.c_expand
+
+{-
+  expandNd :: TensorDouble -> TensorDouble -> Int32 -> IO ()
+  expandNd t0 t1 i = withTHPtr2M t0 t1 (\p0 p1 -> Gen.c_expandNd p0 p1 (fi i))
+-}
+
   get1d :: TensorDouble -> Int64 -> IO Double
   get1d t x = withTHPtr t (realToFrac . (`Gen.c_get1d` fi x))
 
@@ -290,35 +306,93 @@ instance TensorClass TensorDouble where
   narrow :: TensorDouble -> TensorDouble -> Int32 -> Int64 -> Int64 -> IO ()
   narrow t0 t1 i0 i1 i2 = withTHPtr2M t0 t1 (\p0 p1 -> Gen.c_narrow p0 p1 (fi i0) (fi i1) (fi i2))
 
-{-
   new :: IO TensorDouble
-  new = TensorDouble <$> Gen.c_new
+  new = TensorDouble <$> (Gen.c_new >>= newForeignPtr Gen.p_free)
 
-  newClone :: TensorDouble -> IO t
-  newClone t = withTHPtrM t Gen.c_newClone
+  newClone :: TensorDouble -> IO TensorDouble
+  newClone t = TensorDouble <$> (withTHPtrM t Gen.c_newClone >>= newForeignPtr Gen.p_free)
 
-  newContiguous :: TensorDouble -> IO t
-  newContiguous t = withTHPtrM t Gen.c_newContiguous
-  newExpand :: TensorDouble -> StorageLong -> IO t
-  newNarrow :: TensorDouble -> Int32 -> Int64 -> Int64 -> IO t
-  newSelect :: TensorDouble -> Int32 -> Int64 -> IO t
+  newContiguous :: TensorDouble -> IO TensorDouble
+  newContiguous t = TensorDouble <$> (withTHPtrM t Gen.c_newContiguous >>= newForeignPtr Gen.p_free)
+
+  newExpand :: TensorDouble -> StorageLong -> IO TensorDouble
+  newExpand t s = TensorDouble <$> (withTHPtr2M t s Gen.c_newExpand >>= newForeignPtr Gen.p_free)
+
+  newNarrow :: TensorDouble -> Int32 -> Int64 -> Int64 -> IO TensorDouble
+  newNarrow t i a b = TensorDouble <$> do
+    p <- withTHPtrM t (bigflip4 Gen.c_newNarrow (fi i) (fi a) (fi b))
+    newForeignPtr Gen.p_free p
+
+  newSelect :: TensorDouble -> Int32 -> Int64 -> IO TensorDouble
+  newSelect t i a = TensorDouble <$> do
+    p <- withTHPtrM t (bigflip3 Gen.c_newSelect (fi i) (fi a))
+    newForeignPtr Gen.p_free p
+
   newSizeOf :: TensorDouble -> IO StorageLong
+  newSizeOf t = StorageLong <$> do
+    sp <- withTHPtrM t Gen.c_newSizeOf
+    newForeignPtr GenS.p_free sp
+
   newStrideOf :: TensorDouble -> IO StorageLong
-  newTranspose :: TensorDouble -> Int32 -> Int32 -> IO t
-  newUnfold :: TensorDouble -> Int32 -> Int64 -> Int64 -> IO t
-  newView :: TensorDouble -> StorageLong -> IO t
-  newWithSize :: StorageLong -> StorageLong -> IO t
-  newWithSize1d :: Int64 -> IO t
-  newWithSize2d :: Int64 -> Int64 -> IO t
-  newWithSize3d :: Int64 -> Int64 -> Int64 -> IO t
-  newWithSize4d :: Int64 -> Int64 -> Int64 -> Int64 -> IO t
-  newWithStorage   :: Storage TensorDouble -> CPtrdiff -> StorageLong -> StorageLong -> IO t
-  newWithStorage1d :: Storage TensorDouble -> CPtrdiff -> Int64 -> Int64 -> IO t
-  newWithStorage2d :: Storage TensorDouble -> CPtrdiff -> Int64 -> Int64 -> Int64 -> Int64 -> IO t
-  newWithStorage3d :: Storage TensorDouble -> CPtrdiff -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> IO t
-  newWithStorage4d :: Storage TensorDouble -> CPtrdiff -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> IO t
-  newWithTensor :: TensorDouble -> IO t
--}
+  newStrideOf t = StorageLong <$> do
+    sp <- withTHPtrM t Gen.c_newStrideOf
+    newForeignPtr GenS.p_free sp
+
+  newTranspose :: TensorDouble -> Int32 -> Int32 -> IO TensorDouble
+  newTranspose t x y = TensorDouble <$> do
+    p <- withTHPtrM t (bigflip3 Gen.c_newTranspose (fi x) (fi y))
+    newForeignPtr Gen.p_free p
+
+  newUnfold :: TensorDouble -> Int32 -> Int64 -> Int64 -> IO TensorDouble
+  newUnfold t x y z = TensorDouble <$> do
+    p <- withTHPtrM t (bigflip4 Gen.c_newUnfold (fi x) (fi y) (fi z))
+    newForeignPtr Gen.p_free p
+
+  newView :: TensorDouble -> StorageLong -> IO TensorDouble
+  newView t s = TensorDouble <$> (withTHPtr2M t s Gen.c_newView >>= newForeignPtr Gen.p_free)
+
+  newWithSize :: StorageLong -> StorageLong -> IO TensorDouble
+  newWithSize s0 s1 = TensorDouble <$> (withTHPtr2M s0 s1 Gen.c_newWithSize >>= newForeignPtr Gen.p_free)
+
+  newWithSize1d :: Int64 -> IO TensorDouble
+  newWithSize1d s1 = TensorDouble <$> (Gen.c_newWithSize1d (fi s1) >>= newForeignPtr Gen.p_free)
+
+  newWithSize2d :: Int64 -> Int64 -> IO TensorDouble
+  newWithSize2d s1 s2 = TensorDouble <$> (Gen.c_newWithSize2d (fi s1) (fi s2) >>= newForeignPtr Gen.p_free)
+
+  newWithSize3d :: Int64 -> Int64 -> Int64 -> IO TensorDouble
+  newWithSize3d s1 s2 s3 = TensorDouble <$> (Gen.c_newWithSize3d (fi s1) (fi s2) (fi s3) >>= newForeignPtr Gen.p_free)
+
+  newWithSize4d :: Int64 -> Int64 -> Int64 -> Int64 -> IO TensorDouble
+  newWithSize4d s1 s2 s3 s4 = TensorDouble <$> (Gen.c_newWithSize4d (fi s1) (fi s2) (fi s3) (fi s4) >>= newForeignPtr Gen.p_free)
+
+  newWithStorage :: StorageDouble -> CPtrdiff -> StorageLong -> StorageLong -> IO TensorDouble
+  newWithStorage s1 p s2 s3 = TensorDouble <$> do
+    p <- withTHPtr3M s1 s2 s3 (\p1 p2 p3 -> Gen.c_newWithStorage p1 p p2 p3)
+    newForeignPtr Gen.p_free p
+
+  newWithStorage1d :: StorageDouble -> CPtrdiff -> Int64 -> Int64 -> IO TensorDouble
+  newWithStorage1d s1 p i0 i1 = TensorDouble <$> do
+    p <- withTHPtrM s1 (\p1 -> Gen.c_newWithStorage1d p1 p (fi i0) (fi i1))
+    newForeignPtr Gen.p_free p
+
+  newWithStorage2d :: StorageDouble -> CPtrdiff -> Int64 -> Int64 -> Int64 -> Int64 -> IO TensorDouble
+  newWithStorage2d s1 p i0 i1 i2 i3 = TensorDouble <$> do
+    p <- withTHPtrM s1 (\p1 -> Gen.c_newWithStorage2d p1 p (fi i0) (fi i1) (fi i2) (fi i3))
+    newForeignPtr Gen.p_free p
+
+  newWithStorage3d :: StorageDouble -> CPtrdiff -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> IO TensorDouble
+  newWithStorage3d s1 p i0 i1 i2 i3 i4 i5 = TensorDouble <$> do
+    p <- withTHPtrM s1 (\p1 -> Gen.c_newWithStorage3d p1 p (fi i0) (fi i1) (fi i2) (fi i3) (fi i4) (fi i5))
+    newForeignPtr Gen.p_free p
+
+  newWithStorage4d :: StorageDouble -> CPtrdiff -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> IO TensorDouble
+  newWithStorage4d s1 p i0 i1 i2 i3 i4 i5 i6 i7 = TensorDouble <$> do
+    p <- withTHPtrM s1 (\p1 -> Gen.c_newWithStorage4d p1 p (fi i0) (fi i1) (fi i2) (fi i3) (fi i4) (fi i5) (fi i6) (fi i7))
+    newForeignPtr Gen.p_free p
+
+  newWithTensor :: TensorDouble -> IO TensorDouble
+  newWithTensor t = TensorDouble <$> (withTHPtrM t Gen.c_newWithTensor >>= newForeignPtr Gen.p_free)
 
   resize :: TensorDouble -> StorageLong -> StorageLong -> IO ()
   resize t0 s0 s1 = withTHPtr3M t0 s0 s1 Gen.c_resize
@@ -368,14 +442,25 @@ instance TensorClass TensorDouble where
   setFlag :: TensorDouble -> Int8 -> IO ()
   setFlag t i = withTHPtrM t (`Gen.c_setFlag` fi i)
 
+  setStorage :: TensorDouble -> StorageDouble -> CPtrdiff -> StorageLong -> StorageLong -> IO ()
+  setStorage t s d s0 s1 = withTHPtr4M t s s0 s1 (\t' s' s0' s1' -> Gen.c_setStorage t' s' d s0' s1')
+
+  setStorage1d :: TensorDouble -> StorageDouble -> CPtrdiff -> Int64 -> Int64 -> IO ()
+  setStorage1d t s d i0 i1 = withTHPtr2M t s (\t' s' -> Gen.c_setStorage1d t' s' d (fi i0) (fi i1))
+
+  setStorage2d :: TensorDouble -> StorageDouble -> CPtrdiff -> Int64 -> Int64 -> Int64 -> Int64 -> IO ()
+  setStorage2d t s d i0 i1 i2 i3 = withTHPtr2M t s (\t' s' -> Gen.c_setStorage2d t' s' d (fi i0) (fi i1) (fi i2) (fi i3))
+
+  setStorage3d :: TensorDouble -> StorageDouble -> CPtrdiff -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> IO ()
+  setStorage3d t s d i0 i1 i2 i3 i4 i5 = withTHPtr2M t s (\t' s' -> Gen.c_setStorage3d t' s' d (fi i0) (fi i1) (fi i2) (fi i3) (fi i4) (fi i5))
+
+  setStorage4d :: TensorDouble -> StorageDouble -> CPtrdiff -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> IO ()
+  setStorage4d t s d i0 i1 i2 i3 i4 i5 i6 i7 = withTHPtr2M t s (\t' s' -> Gen.c_setStorage4d t' s' d (fi i0) (fi i1) (fi i2) (fi i3) (fi i4) (fi i5) (fi i6) (fi i7))
+
+
 {-
-  setStorage :: TensorDouble -> Storage TensorDouble -> CPtrdiff -> StorageLong -> StorageLong -> IO ()
-  setStorage t s pd sl0 sl1 = withTHPtr3M
-  setStorage1d_ :: TensorDouble -> Storage TensorDouble -> CPtrdiff -> Int64 -> Int64 -> IO ()
-  setStorage2d_ :: TensorDouble -> Storage TensorDouble -> CPtrdiff -> Int64 -> Int64 -> Int64 -> Int64 -> IO ()
-  setStorage3d_ :: TensorDouble -> Storage TensorDouble -> CPtrdiff -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> IO ()
-  setStorage4d_ :: TensorDouble -> Storage TensorDouble -> CPtrdiff -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> Int64 -> IO ()
-  setStorageNd_ :: TensorDouble -> Storage TensorDouble -> CPtrdiff -> Int32 -> Int64 -> Int64 -> IO ()
+  setStorageNd :: TensorDouble -> StorageDouble -> CPtrdiff -> Int32 -> Int64 -> Int64 -> IO ()
+  setStorageNd t s d i0 i1 i2 = withTHPtr2M t s (\t' s' -> Gen.c_setStorageNd t' s' d (fi i0) (fi i1) (fi i2))
 -}
 
   size :: TensorDouble -> Int32 -> IO Int64
@@ -390,10 +475,8 @@ instance TensorClass TensorDouble where
   squeeze1d :: TensorDouble -> TensorDouble -> Int32 -> IO ()
   squeeze1d t0 t1 i = withTHPtr2M t0 t1 (\p0 p1 -> Gen.c_squeeze1d p0 p1 (fi i))
 
-{-
-  storage :: TensorDouble -> IO (Gen.Storage TensorDouble)
-  storage t = withTHPtr t Gen.c_storage
-  -}
+  storage :: TensorDouble -> IO StorageDouble
+  storage t = StorageDouble <$> (withTHPtrM t Gen.c_storage >>= newForeignPtr GenS.p_free)
 
   storageOffset :: TensorDouble -> IO CPtrdiff
   storageOffset t = withTHPtr t Gen.c_storageOffset

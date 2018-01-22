@@ -1,9 +1,13 @@
+{-# LANGUAGE TypeSynonymInstances #-}
 module Torch.Raw.Storage
   ( THStorage(..)
   , module X
   ) where
 
 import Torch.Raw.Internal as X
+
+import THLongStorage as T
+import THDoubleStorage as T
 
 -- CTHDoubleStorage -> CDouble
 class THStorage t where
@@ -51,3 +55,9 @@ class THStorage t where
   p_free :: FunPtr (Ptr t -> IO ())
   p_resize :: FunPtr (Ptr t -> CPtrdiff -> IO ())
   p_fill :: FunPtr (Ptr t -> CDouble -> IO ())
+
+instance THStorage CTHLongStorage where
+  p_free = T.p_THLongStorage_free
+
+instance THStorage CTHDoubleStorage where
+  p_free = T.p_THDoubleStorage_free
