@@ -170,4 +170,3 @@ td_trans t = unsafePerformIO $ do
   pure $ TensorFloat newFPtr
 {-# NOINLINE td_trans #-}
 
-
