@@ -1,6 +1,5 @@
 {-# LANGUAGE TypeFamilies #-}
-
-module Torch.Core.StorageTypes (
+module Torch.Core.Storage.Types (
   StorageSize(..),
   StorageDouble(..),
   StorageLong(..)

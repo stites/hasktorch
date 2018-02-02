@@ -1,6 +1,6 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Torch.Core.StorageLong
+module Torch.Core.Storage.Long
   ( newStorageLong
   ) where
 
@@ -13,7 +13,7 @@ import GHC.Ptr (FunPtr)
 import Numeric (showGFloat)
 import System.IO.Unsafe (unsafePerformIO)
 
-import Torch.Core.StorageTypes
+import Torch.Core.Storage.Types
 import THLongStorage
 
 newStorageLong :: StorageSize Int -> StorageLong

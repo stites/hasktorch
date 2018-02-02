@@ -1,6 +1,4 @@
-{-# LANGUAGE ForeignFunctionInterface #-}
-
-module Torch.Core.StorageDouble
+module Torch.Core.Storage.Double
   ( newStorageDouble
   ) where
 
@@ -13,7 +11,7 @@ import GHC.Ptr (FunPtr)
 import Numeric (showGFloat)
 import System.IO.Unsafe (unsafePerformIO)
 
-import Torch.Core.StorageTypes
+import Torch.Core.Storage.Types
 import THDoubleStorage
 
 newStorageDouble :: StorageSize Double -> StorageDouble

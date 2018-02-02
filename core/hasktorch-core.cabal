@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2ae078d447c6ec69055085d5899a175e1e3249190e4875685997f032cf6d33aa
+-- hash: d8fb7c350c87b7cbf866079bb44e4d8b2f8d828b4d4fa5d9196ee4f1458a1b21
 
 name:           hasktorch-core
 version:        0.1.0.0
@@ -43,25 +43,11 @@ library
       Torch.Core.Internal
       Torch.Core.LogAdd
       Torch.Core.Random
-      Torch.Core.StorageTypes
-      Torch.Core.Tensor.Dim
-      Torch.Core.Tensor.Types
-      Torch.Raw.Blas
-      Torch.Raw.Internal
-      Torch.Raw.Lapack
-      Torch.Raw.Storage
-      Torch.Raw.Storage.Copy
-      Torch.Raw.Tensor
-      Torch.Raw.Tensor.Conv
-      Torch.Raw.Tensor.Copy
-      Torch.Raw.Tensor.Generic
-      Torch.Raw.Tensor.Lapack
-      Torch.Raw.Tensor.Math
-      Torch.Raw.Tensor.Random
-      Torch.Raw.Vector
-      Torch.Core.StorageDouble
-      Torch.Core.StorageLong
+      Torch.Core.Storage.Double
+      Torch.Core.Storage.Long
+      Torch.Core.Storage.Types
       Torch.Core.Tensor
+      Torch.Core.Tensor.Dim
       Torch.Core.Tensor.Dynamic.Double
       Torch.Core.Tensor.Dynamic.DoubleMath
       Torch.Core.Tensor.Dynamic.DoubleRandom
@@ -78,6 +64,20 @@ library
       Torch.Core.Tensor.Static.FloatMath
       Torch.Core.Tensor.Static.Generic
       Torch.Core.Tensor.Static.Long
+      Torch.Core.Tensor.Types
+      Torch.Raw.Blas
+      Torch.Raw.Internal
+      Torch.Raw.Lapack
+      Torch.Raw.Storage
+      Torch.Raw.Storage.Copy
+      Torch.Raw.Tensor
+      Torch.Raw.Tensor.Conv
+      Torch.Raw.Tensor.Copy
+      Torch.Raw.Tensor.Generic
+      Torch.Raw.Tensor.Lapack
+      Torch.Raw.Tensor.Math
+      Torch.Raw.Tensor.Random
+      Torch.Raw.Vector
   other-modules:
       Paths_hasktorch_core
   default-language: Haskell2010
@@ -112,16 +112,16 @@ test-suite spec
       RawLapackSVDSpec
       Torch.Core.LogAddSpec
       Torch.Core.RandomSpec
-      Torch.Core.Tensor.GenericSpec
-      Torch.Prelude.Extras
       Torch.Core.Tensor.Dynamic.DoubleMathSpec
       Torch.Core.Tensor.Dynamic.DoubleRandomSpec
       Torch.Core.Tensor.Dynamic.DoubleSpec
       Torch.Core.Tensor.Dynamic.GenericLapackSpec
+      Torch.Core.Tensor.GenericSpec
       Torch.Core.Tensor.Static.ByteSpec
       Torch.Core.Tensor.Static.DoubleLapackSpec
       Torch.Core.Tensor.Static.DoubleMathSpec
       Torch.Core.Tensor.Static.DoubleRandomSpec
       Torch.Core.Tensor.Static.DoubleSpec
+      Torch.Prelude.Extras
       Paths_hasktorch_core
   default-language: Haskell2010

@@ -44,8 +44,8 @@ import Foreign.ForeignPtr (ForeignPtr, withForeignPtr, newForeignPtr)
 import GHC.Exts
 import System.IO.Unsafe (unsafePerformIO)
 
-import Torch.Core.StorageLong (newStorageLong)
-import Torch.Core.StorageTypes (StorageLong, StorageSize(..))
+import Torch.Core.Storage.Long (newStorageLong)
+import Torch.Core.Storage.Types (StorageLong, StorageSize(..))
 import Torch.Core.Tensor.Types (THForeignRef, THForeignType, TensorFloat, TensorDouble(..))
 import Torch.Core.Tensor.Dim (KnownDim, Dimensions, Dim, SomeDims(..), SingDimensions, KnownNatDim, dim)
 import Torch.Raw.Tensor.Generic (Storage, CTHDoubleTensor, CTHLongStorage, CTHFloatTensor, HaskReal)

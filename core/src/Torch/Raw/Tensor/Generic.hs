@@ -221,15 +221,15 @@ numberFormat precision minSz xs = (format, scale, sz)
       f (NL.infinity, -NL.infinity, True, False, False) z
       where
         f z [] = z
-        f (minAcc, maxAcc, intModeAcc, hasInvalidAcc, hasNegInfAcc) (x:xs) = 
+        f (minAcc, maxAcc, intModeAcc, hasInvalidAcc, hasNegInfAcc) (x:xs) =
             f acc xs
           where
             val = abs x
             newHasNegInf = (x == -NL.infinity) || hasNegInfAcc
             acc =
               if (isNaN val || val == NL.infinity) then
-                (minAcc, maxAcc, intModeAcc, True, newHasNegInf) 
-              else 
+                (minAcc, maxAcc, intModeAcc, True, newHasNegInf)
+              else
                 (newMin, newMax, newIntMode, newHasInvalid, newHasNegInf)
                   where
                     !newHasInvalid = hasInvalidAcc
@@ -238,7 +238,7 @@ numberFormat precision minSz xs = (format, scale, sz)
                     !newIntMode = if (intModeAcc) then
                                     if (val == NL.infinity) then intModeAcc
                                     else mod' val 1 == 0
-                                  else 
+                                  else
                                     False
     prec = precision
     defaultScale = 1.0
@@ -248,7 +248,7 @@ numberFormat precision minSz xs = (format, scale, sz)
     myMinSz = if hasInvalid then max minSz $ 3 + (if hasNegInf then 1 else 0)
               else max minSz 2
     (format, scale, sz) =
-      let expSz = (prec + 4 + (max (length (show expMax)) 
+      let expSz = (prec + 4 + (max (length (show expMax))
                                    (length (show expMin)))) in
       if (intMode) then
         if (expMax > prec + 1) then
@@ -258,12 +258,12 @@ numberFormat precision minSz xs = (format, scale, sz)
         else
           let tmpSz = max myMinSz (expMax + 1) in
           let format = "%" ++ show tmpSz ++ ".0f" in
-          (format, defaultScale, tmpSz) 
+          (format, defaultScale, tmpSz)
       else
         if (expMax - expMin > prec) then
           let tmpSz = max myMinSz expSz in
           let format = "%" ++ show tmpSz ++ "." ++ show prec ++ "e" in
-          (format, 1.0, tmpSz) 
+          (format, 1.0, tmpSz)
         else
           if (expMax > prec + 1) || (expMax < 0) then
             let tmpSz = max myMinSz 7 in
@@ -320,13 +320,14 @@ dispRawRealFloat tensor
    (fmt, scale, size) = numberFormat 4 3 $ flatten tensor
 
    showLim :: RealFloat a => a -> String
-   showLim val = 
-     if (val == NL.infinity) then 
-       Text.Printf.printf ("%"++show size++"s") "Inf"
-     else if (val == -NL.infinity) then 
-       Text.Printf.printf ("%"++show size++"s") "-Inf"
-     else Text.Printf.printf fmt (((realToFrac val)::Double)/realToFrac(scale))
-  
+   showLim val =
+     if (val == NL.infinity) then
+       undefined -- Text.Printf.printf ("%"++show size++"s") "Inf"
+     else if (val == -NL.infinity) then
+       undefined -- Text.Printf.printf ("%"++show size++"s") "-Inf"
+     else
+       undefined -- Text.Printf.printf fmt (((realToFrac val)::Double)/realToFrac(scale))
+
 
 -- ========================================================================= --
 -- TO BE REMOVED: dispRaw
