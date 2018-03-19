@@ -39,24 +39,24 @@ dependencies:
     - cd ./vendor; ./build-error-handler.sh
 
   override:
-    - stack setup
-    - stack build
+    - stack exec cabal -- --version
+    - stack exec cabal -- new-build all
 
 test:
 
   override:
     ### tests
-    - stack test hasktorch-raw
-    - stack test hasktorch-core
+    - stack exec cabal -- new-test hasktorch-raw
+    - stack exec cabal -- new-test hasktorch-core
     ### examples
-    - stack exec static-tensor-usage
-    - stack exec ff-typed
-    - stack exec ff-untyped
-    - stack exec gradient-descent
-    - stack exec static-tensor-usage
+    - stack exec cabal -- new-run static-tensor-usage
+    - stack exec cabal -- new-run ff-typed
+    - stack exec cabal -- new-run ff-untyped
+    - stack exec cabal -- new-run gradient-descent
+    - stack exec cabal -- new-run static-tensor-usage
     ### code generation
-    - stack exec codegen-generic
-    - stack exec codegen-concrete
-    - stack exec codegen-managed
+    - stack exec cabal -- new-run codegen-generic
+    - stack exec cabal -- new-run codegen-concrete
+    - stack exec cabal -- new-run codegen-managed
     ### end-to-end build
     - make init
