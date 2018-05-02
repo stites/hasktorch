@@ -2,50 +2,72 @@
 
 ## Building Hasktorch Manually
 
-To start, retrieve git submodules (includes TorcH library) with:
+* Install a compatible version of `ATen`. One such way is to use the submodule
+  included in this repo.
 
-```
-git submodule update --init --recursive
-```
+  * Clone it into `vendor/aten` with:
 
-A recent version of the gcc C compiler is used to build the TorcH C library. If
-gcc is already installed, you should be able to run these scripts from
-within the `vendor/` directory:
+    ```
+    git submodule update --init --recursive
+    ```
 
-```
-cd vendor
-./build-aten.sh
-./build-error-handler.sh
-```
+  * Build `ATen`. Refer to the full documentation at
+    [https://github.com/hasktorch/ATen](https://github.com/hasktorch/ATen) for
+    how to do so, but here is a quick example:
 
-the `build-aten.sh` script builds `libATen.so`, while the
-`build-error-handler.sh` script builds libEHX.so (or .dylib on OSX). Currently
-the error handler isn't fully implemented, but developers can refer to
-[Exceptions.hs](https://github.com/austinvhuang/hasktorch/blob/master/core/src/Torch/Core/Exceptions.hs)
-for an example of how the custom exception handling is integrated with the TH
-API.
+    ```
+    cd vendor/aten
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=.
+    make install
+    ```
 
-On OSX the above script looks for the gcc-6 binary which needs to be installed
-using [homebrew](https://brew.sh/). On linux, this simply uses gcc. 
+    (To build without CUDA support, use `-DNO_CUDA=true`)
 
-If successful, this builds the TH shared library and places it in the
-`vendor/build/` directory. Then build the project using stack:
+    This will create `vendor/aten/build/lib` and `vendor/aten/build/include`
+    directories containing the `libATen.so` shared object and header files,
+    respectively.
 
-```
-cabal new-build all
-```
+* Create a `cabal.project.local` file with settings for your particular
+  installation.
 
-If everything built, you should be able to run tests successfully:
+  This serves two primary purposes:
 
-```
-cabal new-test all
-```
+  * Locate `ATen` build artifacts, if they were installed to a non-standard
+    system location, as in the example above, which installed into
+    `vendor/aten/build`.
+
+    ```
+    package hasktorch-raw-th
+      extra-lib-dirs: /path/to/vendor/aten/build/lib
+      extra-include-dirs: /path/to/vendor/aten/build/include
+    ```
+
+  * Build without CUDA support, if desired.
+
+    ```
+    package hasktorch-core
+      flags: -cuda
+    ```
+
+* Build `hasktorch-core`.
+
+  ```
+  cabal new-build hasktorch-core
+  ```
+
+* Test `hasktorch-core`.
+
+  ```
+  cabal new-test hasktorch-core
+  ```
 
 ## References
 
 ### Torch Internals
 
-- [Torch Internals Writeup by Adam Paszke](https://apaszke.github.io/torch-internals.html) 
+- [Torch Internals Writeup by Adam Paszke](https://apaszke.github.io/torch-internals.html)
 - [A Tour of PyTorch Internals (Part I)](http://pytorch.org/2017/05/11/Internals.html)
 - [Haskell/Torch binding using backpack](http://blog.ezyang.com/2017/08/backpack-for-deep-learning/).
 
