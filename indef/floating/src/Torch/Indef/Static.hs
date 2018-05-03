@@ -18,9 +18,6 @@ import Torch.Indef.Static.Tensor.Math.Lapack as X
 import Torch.Class.NN.Static as X
 import Torch.Indef.Static.NN as X
 
-import Torch.Class.NN.Static.Abs as X
-import Torch.Indef.Static.NN.Abs as X
-
 -- ========================================================================= --
 
 import Torch.Sig.Types (Tensor)
