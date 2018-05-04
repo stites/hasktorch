@@ -3,6 +3,7 @@
 {-# OPTIONS_GHC -fno-cse  #-}
 module Torch.Indef.Static (module X) where
 
+import Torch.Indef.Dynamic ()
 import "hasktorch-indef-unsigned" Torch.Indef.Static as X
 import Torch.Indef.Static.Tensor.Math.Pointwise.Signed as X
 

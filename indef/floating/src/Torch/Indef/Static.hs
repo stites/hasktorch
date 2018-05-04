@@ -1,6 +1,7 @@
 {-# LANGUAGE PackageImports #-}
 module Torch.Indef.Static (module X) where
 
+import Torch.Indef.Dynamic ()
 import "hasktorch-indef-signed" Torch.Indef.Static as X
 
 -- Typeclasses already included

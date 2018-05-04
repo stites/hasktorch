@@ -2,6 +2,7 @@
 {-# OPTIONS_GHC -fno-cse  #-}
 module Torch.Indef.Static (module X) where
 
+import Torch.Indef.Dynamic ()
 import System.IO.Unsafe (unsafePerformIO)
 import Torch.Dimensions
 import Torch.Indef.Types
