@@ -9,6 +9,7 @@ import Torch.Indef.Types
 import Torch.Indef.Dynamic.NN ()
 import Torch.Indef.Static.Tensor ()
 import Torch.Indef.Static.NN.Math ()
+import Torch.Indef.Static.NN.Conv ()
 
 instance Class.BatchNormalization Tensor where
   _batchNormalization_updateOutput t0 t1 t2 t3 t4 t5 t6 t7 = Dynamic.batchNormalization_updateOutput

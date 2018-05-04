@@ -9,8 +9,6 @@ import qualified Torch.Class.Tensor.Static as Class
 import qualified Torch.Types.TH as TH
 import qualified Torch.Sig.Types as Sig
 import Data.Coerce
-import GHC.TypeLits (natVal)
-import Data.Proxy (Proxy(..))
 import Data.List
 
 import Torch.Indef.Types

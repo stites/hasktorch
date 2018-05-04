@@ -7,7 +7,6 @@ import Torch.Class.Types
 import Torch.Class.Tensor.Static
 import qualified Torch.Class.Tensor as Dynamic
 import qualified Torch.Class.Tensor.Index as Dynamic
-import GHC.TypeLits
 import Data.Proxy
 import GHC.Natural
 import Torch.Dimensions

@@ -44,6 +44,7 @@ library
     , Torch.Indef.Static
 
     , Torch.Indef.Static.NN
+    , Torch.Indef.Static.NN.Conv
     , Torch.Indef.Static.NN.Math
     , Torch.Indef.Static.Tensor.Math.Blas
     , Torch.Indef.Static.Tensor.Math.Lapack

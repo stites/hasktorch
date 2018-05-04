@@ -6,23 +6,19 @@
 module Torch.Class.Tensor.Static where
 
 import Data.Proxy
-import GHC.TypeLits
-import GHC.Int
-import GHC.Natural
-import Foreign hiding (new)
-import Control.Exception.Safe
 import Data.List
-import Data.Singletons
-import Data.Singletons.TypeLits
-import Data.Singletons.Prelude.Num
-import Control.Monad
+import Data.List.NonEmpty (NonEmpty)
 import Data.Maybe
+import Control.Exception.Safe
+import Control.Monad
 import Control.Monad.Trans
 import Control.Monad.Trans.Maybe
+import Foreign hiding (new)
+import GHC.Int
+import GHC.Natural
 import System.IO.Unsafe
 
 import Torch.Dimensions
-import Data.List.NonEmpty (NonEmpty)
 
 import Torch.Class.Types
 import Torch.Class.Tensor.Copy.Static
