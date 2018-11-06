@@ -416,3 +416,29 @@ executable xor
         default-extensions: NoStarIsType
     else
 
+executable experimental-deanie
+    main-is: Main.hs
+    hs-source-dirs: experimental/deanie
+    default-language: Haskell2010
+    build-depends:
+        base (==4.7 || >4.7) && <5,
+        hasktorch (==0.0.1 || >0.0.1) && <0.0.2,
+        microlens ==0.4.8 || >0.4.8,
+        dimensions ==1.0 || >1.0,
+        safe-exceptions ==0.1.0 || >0.1.0,
+        singletons ==2.2 || >2.2,
+        backprop ==0.2.5 || >0.2.5,
+        unordered-containers ==0.2.9 || >0.2.9,
+        dlist ==0.8.0 || >0.8.0,
+        ghc-typelits-natnormalise -any,
+        list-t ==1.0.1 || >1.0.1,
+        mtl ==2.2.2 || >2.2.2,
+        monad-loops ==0.4.3 || >0.4.3,
+        mwc-random ==0.14.0 || >0.14.0,
+        mwc-probability -any,
+        vector ==0.12.0 || >0.12.0,
+        time ==1.8.0 || >1.8.0,
+        transformers ==0.5.5 || >0.5.5,
+        safe-exceptions ==0.1.0 || >0.1.0,
+        free -any
+
