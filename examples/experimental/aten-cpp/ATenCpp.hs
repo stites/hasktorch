@@ -33,6 +33,15 @@ catchBlock :: QuasiQuoter
   Variant of throwBlock for blocks which return void.
 -}
 
+import qualified Language.C.Inline.Cpp as C
+import qualified Language.C.Inline.Cpp.Exceptions as C
+
+C.context C.cppCtx
+
+C.include "<ATen>"
+
+C.using "namespace at"
+
 main :: IO ()
 main = print "hello"
 
