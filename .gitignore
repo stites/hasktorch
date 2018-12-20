@@ -1,4 +1,6 @@
 ### Temporary ignorables (for scoping with vim) ###
+libtorch
+libtorch-shared-with-deps-latest.zip
 
 ### Custom ignorables ###
 .ghc.environment*

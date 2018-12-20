@@ -507,9 +507,12 @@ executable aten-cpp
     main-is: ATenCpp.hs
     hs-source-dirs: experimental/aten-cpp
     default-language: Haskell2010
+    -- extra-libraries: torch stdc++
+    extra-libraries: stdc++ torch
+    cc-options: -Wall -Werror
     build-depends:
-        base (==4.7 || >4.7) && <5,
-        inline-c-cpp
-    extra-libraries:
-        ATen stdc++
+        base (==4.7 || >4.7) && <5
+      , inline-c
+      , inline-c-cpp
+      , safe-exceptions
 
