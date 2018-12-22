@@ -9,24 +9,42 @@
 module Main where
 
 import Control.Monad
-import Control.Monad.Free
 import qualified System.Random.MWC.Probability as MWC
+-- import Control.Monad.Free
+-- import Control.Applicative.Extended (replicateA)
+-- import Control.Applicative.Free hiding (Pure)
+-- import Control.Monad.Free
+-- import Data.Functor.Sum
+-- import Prelude hiding (product)
+
 
 main = putStrLn "hello"
 
-
-data ModelF r =
-    BernoulliF Double (Bool -> r)
-  | BetaF Double Double (Double -> r)
-  deriving (Functor)
+data ModelF r
+  = BernoulliF Double        (Bool -> r)
+  | BetaF      Double Double (Double -> r)
+  | GaussianF  Double Double (Double -> r)
+  | GammaF     Double Double (Double -> r)
+  deriving Functor
 
 type Model = Free ModelF
 
-bernoulli :: Double -> Model Bool
-bernoulli p = liftF $ BernoulliF p id
+-- newtype ProgramF a = ProgramF (Sum ProbF (Ap (Free ProgramF)) a)
+--   deriving Functor
 
-beta :: Double -> Double -> Model Double
+type Program = Free ProgramF
+
+bernoulli :: Double -> Program Bool
+bernoulli p = liftF (BernoulliF p id)
+
+beta :: Double -> Double -> Program Double
 beta a b = liftF (BetaF a b id)
+
+gamma :: Double -> Double -> Program Double
+gamma a b = liftF (GammaF a b id)
+
+gaussian :: Double -> Double -> Program Double
+gaussian m s = liftF (GaussianF m s id)
 
 uniform :: Model Double
 uniform = beta 1 1
@@ -55,22 +73,22 @@ simulate model = MWC.withSystemRandom $ \g ->
     sampling :: MWC.GenIO -> IO a
     sampling g = (MWC.sample ((toSampler model) :: MWC.Prob IO a ) :: MWC.GenIO -> IO a) g
 
-rejectionInverter
-  :: forall m a b . (Monad m, Eq b)
+rejectionInvert
+  :: (Monad m, Eq b)
   => m a              -- ^ model which represents the proposal of hyperparameters
   -> (a -> m b)       -- ^ model which takes in the proposed hyperparams and outputs inference
   -> [b]              -- ^ data to fit
   -> m a              -- ^ an inverted model
-rejectionInverter = rejectionInverterBy id
+rejectionInvert = rejectionInvertBy id
 
-rejectionInverterBy
+rejectionInvertBy
   :: forall m a b c . (Monad m, Eq c)
   => ([b] -> c)       -- ^ assisting function called on sample to preprocess rejection
   -> m a              -- ^ model which represents the proposal of hyperparameters
   -> (a -> m b)       -- ^ model which takes in the proposed hyperparams and outputs inference
   -> [b]              -- ^ data to fit
   -> m a              -- ^ an inverted model
-rejectionInverterBy assister proposal model observed = go
+rejectionInvertBy assister proposal model observed = go
   where
     observed' :: c
     observed' = assister observed
@@ -82,6 +100,5 @@ rejectionInverterBy assister proposal model observed = go
       if assister generated == observed'
       then pure params
       else go
-
 
 

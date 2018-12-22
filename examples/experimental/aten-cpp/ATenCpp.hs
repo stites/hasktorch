@@ -1,19 +1,47 @@
+-------------------------------------------------------------------------------
+-- |
+-- Module    :  ATenCpp
+-- Copyright :  (c) Sam Stites 2017
+-- License   :  BSD3
+-- Maintainer:  sam@stites.io
+-- Stability :  experimental
+-- Portability: non-portable
+--
+-- Example usage of ATen from the readme with inline-c-cpp:
+--
+-- @
+--   using namespace at; // assumed in the following
+--
+--   Tensor d = CPU(kFloat).ones({3, 4});
+--   Tensor r = CPU(kFloat).zeros({3,4})
+--   for(auto i = 0; i < 100000; i++) {
+--     r = r.add(d);
+--     // equivalently
+--     r = r + d;
+--     // or
+--     r += d;
+--   }
+-- @
+-------------------------------------------------------------------------------
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
-
+import Control.Exception.Safe
+import Control.Monad
+import qualified Language.C.Inline.Cpp as C
+import qualified Language.C.Inline.Cpp.Exceptions as C
 import Language.C.Inline.Cpp
-{-
-Module exposing a Context to inline C++ code. We only have used this for experiments, so use with caution. See the C++ tests to see how to build inline C++ code.
-
-cppCtx :: Context
-  The equivalent of baseCtx for C++. It specifies the .cpp file extension for the C file, so that g++ will decide to build C++ instead of C. See the .cabal test target for an example on how to build.
-
-using :: String -> DecsQ
-  Emits an using directive, e.g.
-  C.using "namespace std" ==> using namespace std
-
--}
 import Language.C.Inline.Cpp.Exceptions
+
+C.context C.cppCtx
+-- The equivalent of baseCtx for C++. It specifies the .cpp file extension for the C file, so that g++ will decide to build C++ instead of C. See the .cabal test target for an example on how to build.
+
+C.using "namespace at"
+-- Emits an using directive, e.g. @C.using "namespace std"@ ==> using namespace std
+
+
 {-
 A module that contains exception-safe equivalents of inline-c QuasiQuoters.
 
@@ -38,16 +66,6 @@ main = print "hello"
 
 --- how to use inline-c-cpp
 {-
-
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-
-import           Control.Exception.Safe
-import           Control.Monad
-import qualified Language.C.Inline.Cpp as C
-import qualified Language.C.Inline.Cpp.Exceptions as C
-import qualified Test.Hspec as Hspec
 
 C.context C.cppCtx
 

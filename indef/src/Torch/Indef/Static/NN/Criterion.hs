@@ -186,7 +186,7 @@ mSECriterion :: forall s bs d d'
   => d ~ (bs :+ d')      -- must have minibatch
   => Tensor d            -- ^ target
   -> BVar s (Tensor d)   -- ^ input
-  -> BVar s (Tensor '[1]) -- ^ loss value and arrow from output gradient to input gradient
+  -> BVar s (Tensor '[1]) -- ^ loss value
 mSECriterion = mSECriterionWith (sing :: SBool 'True) (sing :: SBool 'True)
 
 
